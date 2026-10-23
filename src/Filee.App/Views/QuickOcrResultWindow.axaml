@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Filee.App.Views.QuickOcrResultWindow"
+        Width="460" Height="340" MinWidth="360" MinHeight="260"
+        WindowDecorations="None"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        CanResize="True"
+        Background="Transparent">
+  <Border Classes="card" Margin="12" Padding="16,14">
+    <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+      <DockPanel Grid.Row="0" Margin="0,0,0,8">
+        <Button DockPanel.Dock="Right" Classes="icon" Padding="4" Click="OnClose">
+          <PathIcon Width="12" Height="12" Data="{StaticResource Icon.Close}" />
+        </Button>
+        <TextBlock x:Name="TitleText" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+      </DockPanel>
+      <TextBox x:Name="ResultText" Grid.Row="1" Margin="0,0,0,8" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+               ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+      <TextBlock x:Name="TranslationHint" Grid.Row="2" Margin="0,0,0,8" Classes="caption" TextWrapping="Wrap"
+                 Text="{DynamicResource ocr.translation_hint}" />
+      <StackPanel x:Name="TranslationPanel" Grid.Row="3" Margin="0,0,0,8" Spacing="4" IsVisible="False">
+        <TextBlock Classes="caption" Text="{DynamicResource ocr.translation_result}" />
+        <TextBox x:Name="TranslationText" MinHeight="72" MaxHeight="120" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+      </StackPanel>
+      <TextBlock x:Name="StatusText" Grid.Row="4" Margin="0,0,0,8" Classes="caption" TextWrapping="Wrap" />
+      <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button x:Name="TranslateButton" Classes="ghost" Click="OnTranslate" Content="{DynamicResource ocr.translate}" />
+        <Button x:Name="CopyTranslationButton" Classes="ghost" Click="OnCopyTranslation" Content="{DynamicResource ocr.translation_copy}" IsVisible="False" />
+        <Button x:Name="CopyButton" Classes="accent" Click="OnCopy" Content="{DynamicResource ocr.copy}" />
+        <Button Classes="ghost" Click="OnClose" Content="{DynamicResource ocr.close}" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

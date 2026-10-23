@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Filee.App.Views.ScreenshotSelectionWindow"
+        Title="Filee OCR"
+        Width="1100" Height="720"
+        WindowDecorations="None"
+        ShowInTaskbar="False"
+        Topmost="True"
+        CanResize="False"
+        Background="#FF111827"
+        Cursor="Cross">
+  <Grid x:Name="SelectionSurface" Focusable="True" ClipToBounds="True">
+    <Image x:Name="ScreenImage" Stretch="Fill" />
+    <Border Background="#66000000" />
+    <Canvas x:Name="SelectionCanvas" Background="Transparent">
+      <Border x:Name="SelectionOutline" IsVisible="False" BorderBrush="#FF6EE7F9"
+              Background="#226EE7F9" BorderThickness="2" />
+    </Canvas>
+    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18" CornerRadius="10"
+            Background="#E51B2432" BorderBrush="#668EA3B8" BorderThickness="1" Padding="14,9"
+            IsHitTestVisible="False">
+      <TextBlock x:Name="HintText" Text="{DynamicResource ocr.selection_hint}" Foreground="White"
+                 FontSize="14" FontWeight="SemiBold" />
+    </Border>
+  </Grid>
+</Window>
