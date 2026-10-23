@@ -1,5 +1,5 @@
 # Builds the Windows installer and publishes it to GitHub Releases.
-# Trigger: push a tag like v1.0.0  (git tag v1.0.0 && git push origin v1.0.0)
+# Trigger: push a tag like filee-ming-v2.0.1.
 #
 # Output (build/build-installer.ps1): filee-ming-<version>-win-Setup.exe, filee-ming-<version>-win-Portable.zip
 # and filee-ming-<version>-SHA256SUMS.txt. This fork builds the Windows version only.
@@ -12,7 +12,7 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ['filee-ming-v*']
 
 permissions:
   contents: write
@@ -31,7 +31,11 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $tag = '${{ github.ref_name }}'
+          $prefix = 'filee-ming-v'
+          if (-not $tag.StartsWith($prefix, [StringComparison]::Ordinal)) { throw "Unsupported release tag: $tag" }
+          $version = $tag.Substring($prefix.Length)
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Invalid Filee version in release tag: $tag" }
           "value=$version" >> $env:GITHUB_OUTPUT
 
       - name: Fonts
@@ -113,4 +117,5 @@ jobs:
           if ($tail) { $parts += $tail }
           $notesFile = Join-Path $env:RUNNER_TEMP 'notes.md'
           Set-Content $notesFile ($parts -join "`n`n") -Encoding utf8
-          gh release create '${{ github.ref_name }}' --title "filee-ming $version" --notes-file $notesFile --verify-tag @files
+          gh release create '${{ github.ref_name }}' --title "filee-ming $version" --notes-file $notesFile --verify-tag --latest=false @files
+
