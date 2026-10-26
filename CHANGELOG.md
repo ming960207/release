@@ -14,6 +14,15 @@ change, a language may repeat; a language without lines shows the English ones):
 - `recommended`: bug fixes. The card shows once per version.
 - `optional`: new features only. No card, the sidebar button only.
 
+## 2.0.2
+
+<!-- update
+level: optional
+en: Removed the GitHub, Sponsor and version footer from the main navigation
+zh: 移除了主窗口侧栏底部的 GitHub、赞助和版本信息
+ko: 왼쪽 탐색 메뉴 아래의 GitHub·후원·버전 표시를 없앴어요
+-->
+
 ## 2.0.1
 
 <!-- update
@@ -829,3 +838,4 @@ zh: 更新通知会显示重要程度和更新内容
 
 - Ctrl+drag stopped working after the Photos app had been opened, until Filee was restarted. The donut now stays on
   top of other windows.
+
