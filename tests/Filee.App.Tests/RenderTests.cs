@@ -1270,7 +1270,7 @@ public class RenderTests
     [InlineData("ko")]
     [InlineData("ru")]
     [InlineData("ar")]
-    public void Sidebar_shows_the_version_and_a_new_release(string language)
+    public void Sidebar_hides_project_links_and_version_but_keeps_new_release_button(string language)
     {
         TestServices.EnsureInitialized(language);
         var updates = AppHost.Get<UpdateService>();
@@ -1279,9 +1279,13 @@ public class RenderTests
         window.Show();
         Pump();
         var button = window.FindControl<Button>("UpdateButton")!;
-        var version = window.FindControl<TextBlock>("VersionLabel")!;
+        var localizer = AppHost.Get<Filee.Core.Localization.ILocalizer>();
+        var visibleText = window.GetVisualDescendants().OfType<TextBlock>().Select(text => text.Text).ToArray();
+        Assert.DoesNotContain("GitHub", visibleText);
+        Assert.DoesNotContain(localizer["about.sponsor"], visibleText);
+        Assert.DoesNotContain(localizer.Format("about.version", UpdateService.CurrentVersion), visibleText);
+        Assert.Null(window.FindControl<TextBlock>("VersionLabel"));
         Assert.False(button.IsVisible);
-        Assert.Contains(UpdateService.CurrentVersion, version.Text);
 
         try
         {
@@ -1940,3 +1944,4 @@ public class RenderTests
         frame.Save(stream, new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
     }
 }
+
