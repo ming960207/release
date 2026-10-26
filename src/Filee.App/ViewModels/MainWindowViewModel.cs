@@ -36,16 +36,13 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly ILocalizer _loc;
     private bool _disposed;
 
-    /// <summary>The repository, for the GitHub button above the version.</summary>
-    public string RepositoryUrl => UpdateService.RepositoryUrl;
-
     public MainWindowViewModel(IServiceProvider services, ILocalizer loc, UpdateService updates)
     {
         _services = services;
         _loc = loc;
         Updates = updates;
         updates.PropertyChanged += OnUpdatesChanged;
-        RefreshVersionTexts();
+        RefreshUpdateTexts();
         Items =
         [
             new("home", "nav.home", "Icon.Home", typeof(HomePageViewModel)),
@@ -67,7 +64,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public IReadOnlyList<NavItem> Items { get; }
 
-    /// <summary>Update state for the bottom of the navigation (version, "update available" button).</summary>
+    /// <summary>Update state for the conditional download button at the bottom of the navigation.</summary>
     public UpdateService Updates { get; }
 
     [ObservableProperty] private NavItem _selectedItem;
@@ -80,7 +77,6 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// (<see cref="IFitsWindowHeight"/>, e.g. the presets list and editor).
     /// </summary>
     public ScrollBarVisibility PageScroll => CurrentPage is IFitsWindowHeight ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
-    [ObservableProperty] private string _versionText = "";
     [ObservableProperty] private string _updateText = "";
     [ObservableProperty] private string _updateTip = "";
 
@@ -91,20 +87,19 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     private void OnUpdatesChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (UpdateTexts.Affects(e.PropertyName))
-            RefreshVersionTexts();
+            RefreshUpdateTexts();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         foreach (var item in Items)
             item.Refresh(_loc);
-        RefreshVersionTexts();
+        RefreshUpdateTexts();
         CurrentPage = CreatePage(SelectedItem); // rebuild so code-generated labels update too
     }
 
-    private void RefreshVersionTexts()
+    private void RefreshUpdateTexts()
     {
-        VersionText = _loc.Format("about.version", UpdateService.CurrentVersion);
         UpdateText = UpdateTexts.Short(Updates, _loc);
         var changes = UpdateTexts.Changes(Updates, _loc);
         UpdateTip = UpdateTexts.Status(Updates, _loc)
@@ -142,3 +137,4 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         (CurrentPage as IDisposable)?.Dispose();
     }
 }
+
