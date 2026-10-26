@@ -1,6 +1,6 @@
 // Connects the global input hook (SharpHook / libuiohook) to the GestureDetector and forwards detected
-// gestures to the UI thread. Hook callbacks must return quickly: Windows silently removes a low-level hook
-// whose callback takes longer than ~1 s, so no UI work happens here.
+// gestures to the UI thread. On Windows the hook is synchronous so the mini-browser click can be suppressed;
+// callbacks only filter input and post work to the UI thread.
 
 using System.Diagnostics;
 using Avalonia.Threading;
@@ -20,20 +20,20 @@ public sealed class TriggerService : IDisposable
     private readonly ILogger<TriggerService> _log;
     private readonly GestureDetector _detector = new();
     private readonly string _ownProcess = Process.GetCurrentProcess().ProcessName;
-    private EventLoopGlobalHook? _hook;
+    private IGlobalHook? _hook;
     private Thread? _hookThread;
-    private readonly Func<EventLoopGlobalHook> _createHook;
+    private readonly Func<IGlobalHook> _createHook;
     private HashSet<string> _excluded = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>FILEE_TRACE_GESTURES=1 logs each mouse press and scope decision, to find why a gesture doesn't fire.</summary>
     private static readonly bool Trace = Environment.GetEnvironmentVariable("FILEE_TRACE_GESTURES") == "1";
 
     public TriggerService(IPlatformServices platform, ILogger<TriggerService> log)
-        : this(platform, log, () => new EventLoopGlobalHook(useBackgroundThreadForEventLoop: true))
+        : this(platform, log, CreateHook)
     {
     }
 
-    internal TriggerService(IPlatformServices platform, ILogger<TriggerService> log, Func<EventLoopGlobalHook> createHook)
+    internal TriggerService(IPlatformServices platform, ILogger<TriggerService> log, Func<IGlobalHook> createHook)
     {
         _platform = platform;
         _log = log;
@@ -67,6 +67,9 @@ public sealed class TriggerService : IDisposable
     /// <summary>The configured two-key screenshot OCR shortcut was pressed on a platform with screen selection.</summary>
     public event EventHandler? ScreenshotOcrRequested;
 
+    /// <summary>Alt + right-click opened the temporary mini browser at the pointer.</summary>
+    public event EventHandler<GestureEventArgs>? MiniBrowserRequested;
+
     private volatile bool _watchFlipKey;
     private volatile string? _flipKey = DonutSettings.DefaultFlipKey;
     private volatile bool _flipWheel = true;
@@ -75,6 +78,8 @@ public sealed class TriggerService : IDisposable
     private volatile ScreenshotOcrHotkey _screenshotOcrShortcut = new(KeyCode.VcQ, ModifierKeys.Alt);
     private volatile bool _suppressScreenshotOcrShortcut;
     private volatile bool _paused;
+    private volatile bool _miniBrowserEnabled;
+    private bool _miniBrowserRightButtonDown; // hook thread only
 
     private sealed record ScreenshotOcrHotkey(KeyCode Key, ModifierKeys Modifiers);
 
@@ -159,7 +164,7 @@ public sealed class TriggerService : IDisposable
     /// <summary>Last known cursor position (physical pixels).</summary>
     public (int X, int Y) LastCursor { get; private set; }
 
-    public bool IsRunning => _hook?.IsRunning == true;
+    public bool IsRunning => _hook is BasicGlobalHookBase hook && hook.IsRunning;
     public string? Error { get; private set; }
 
     /// <summary>
@@ -172,12 +177,20 @@ public sealed class TriggerService : IDisposable
 
     private void NotifyStatus() => Post(() => StatusChanged?.Invoke(this, EventArgs.Empty));
 
+    internal static bool IsMiniBrowserShortcut(TriggerMouseButton button, ModifierKeys modifiers, bool enabled) =>
+        enabled && button == TriggerMouseButton.Right && modifiers == ModifierKeys.Alt;
+
+    private static IGlobalHook CreateHook() => OperatingSystem.IsWindows()
+        ? new SimpleGlobalHook()
+        : new EventLoopGlobalHook(useBackgroundThreadForEventLoop: true);
+
     public void Apply(AppSettings settings)
     {
         _detector.Configure(settings.Triggers.Where(g => _platform.SupportsSelectionShortcut || g.Kind == TriggerKind.Drag).ToList());
         _detector.Paused = settings.Paused;
         _paused = settings.Paused;
         _screenshotOcrShortcut = ResolveScreenshotOcrShortcut(settings.ScreenshotOcrShortcut);
+        _miniBrowserEnabled = OperatingSystem.IsWindows() && settings.MiniBrowserEnabled;
         _flipKey = settings.Donut.EffectiveFlipKey(settings.Triggers);
         _flipWheel = settings.Donut.FlipWithWheel;
         _excluded = new HashSet<string>(settings.ExcludedProcesses.Select(p => p.Trim().Replace(".exe", "", StringComparison.OrdinalIgnoreCase)),
@@ -217,12 +230,28 @@ public sealed class TriggerService : IDisposable
                 if (Trace)
                     _log.LogInformation("Trace: press {Button} at {X},{Y}, mask {Mask} = {Modifiers}", e.Data.Button, e.Data.X, e.Data.Y, e.RawEvent.Mask, Map(e.RawEvent.Mask));
                 var (x, y) = ButtonPoint(e);
-                _detector.MouseDown(Map(e.Data.Button), x, y, Map(e.RawEvent.Mask));
+                var button = Map(e.Data.Button);
+                var modifiers = Map(e.RawEvent.Mask);
+                if (!_paused && IsMiniBrowserShortcut(button, modifiers, _miniBrowserEnabled))
+                {
+                    e.SuppressEvent = true;
+                    _miniBrowserRightButtonDown = true;
+                    Post(() => MiniBrowserRequested?.Invoke(this, new GestureEventArgs(null, x, y)));
+                    return;
+                }
+                _detector.MouseDown(button, x, y, modifiers);
             };
             _hook.MouseReleased += (_, e) =>
             {
                 var (x, y) = ButtonPoint(e);
-                _detector.MouseUp(Map(e.Data.Button), x, y);
+                var button = Map(e.Data.Button);
+                if (button == TriggerMouseButton.Right && _miniBrowserRightButtonDown)
+                {
+                    e.SuppressEvent = true;
+                    _miniBrowserRightButtonDown = false;
+                    return;
+                }
+                _detector.MouseUp(button, x, y);
             };
             _hook.MouseDragged += (_, e) => OnMove(e);
             _hook.MouseMoved += (_, e) => OnMove(e);
@@ -397,7 +426,7 @@ public sealed class TriggerService : IDisposable
             _log.LogWarning(ex, "Could not stop the global input hook");
             // SharpHook marks the hook disposed before Stop can throw. Its finalizer must not
             // dispose the already-completed event queue again; we still own and join its Run thread.
-            if (_hook is { IsDisposed: true } failedHook)
+            if (_hook is BasicGlobalHookBase { IsDisposed: true } failedHook)
                 GC.SuppressFinalize(failedHook);
             Error = ex.Message;
             NotifyStatus();

@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Filee.App.Views.MiniBrowserWindow"
+        Title="{DynamicResource triggers.mini_browser_title}"
+        Icon="avares://Filee/Assets/Icons/filee.ico"
+        Width="560" Height="400" MinWidth="360" MinHeight="240"
+        CanResize="True" Topmost="True" ShowInTaskbar="False"
+        WindowStartupLocation="Manual">
+  <Grid RowDefinitions="Auto,*" Background="{DynamicResource SurfaceBrush}">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" Margin="8">
+      <Button x:Name="BackButton" Classes="ghost" Content="‹" Width="36" IsEnabled="False"
+              ToolTip.Tip="{DynamicResource mini_browser.back}" />
+      <Button x:Name="ForwardButton" Grid.Column="1" Classes="ghost" Content="›" Width="36" IsEnabled="False"
+              ToolTip.Tip="{DynamicResource mini_browser.forward}" />
+      <Button x:Name="RefreshButton" Grid.Column="2" Classes="ghost" Content="↻" Width="36"
+              ToolTip.Tip="{DynamicResource mini_browser.refresh}" />
+      <TextBox x:Name="AddressBox" Grid.Column="3" Margin="6,0" PlaceholderText="{DynamicResource mini_browser.address}"
+               VerticalAlignment="Center" />
+      <Button x:Name="GoButton" Grid.Column="4" Classes="accent" Content="{DynamicResource mini_browser.go}" />
+    </Grid>
+    <NativeWebView x:Name="Browser" Grid.Row="1" />
+  </Grid>
+</Window>

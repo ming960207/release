@@ -6,6 +6,19 @@ namespace Filee.Core.Tests;
 
 public class UserDataStoreTests
 {
+    [Fact]
+    public void Settings_from_before_the_mini_browser_migrate_to_enabled_by_default()
+    {
+        using var dir = new TempDir();
+        File.WriteAllText(Path.Combine(dir.Path, "settings.json"), "{\"schemaVersion\":33}");
+
+        var store = new UserDataStore(dir.Path);
+        store.Load();
+
+        Assert.True(store.Settings.MiniBrowserEnabled);
+        Assert.Equal(AppSettings.CurrentSchemaVersion, store.Settings.SchemaVersion);
+    }
+
     [Theory]
     [InlineData(30)]
     [InlineData(31)]

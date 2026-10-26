@@ -108,6 +108,7 @@ public partial class App : Application
             }
         };
         triggers.ScreenshotOcrRequested += (_, _) => _ = AppHost.Get<QuickOcrService>().StartAsync();
+        triggers.MiniBrowserRequested += (_, e) => AppHost.Get<WindowService>().ShowMiniBrowser(e.X, e.Y);
         triggers.Start();
         log.LogInformation("Filee {Version} started", UpdateService.CurrentVersion);
         // Which way the transparent windows (donut, toast) are drawn, for reports of one that isn't see-through (#269).

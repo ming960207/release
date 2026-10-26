@@ -140,6 +140,20 @@
       </StackPanel>
     </Border>
 
+    <Border x:Name="MiniBrowserCard" Classes="card" IsVisible="{Binding CanUseMiniBrowser}">
+      <DockPanel>
+        <ToggleSwitch x:Name="MiniBrowserToggle" DockPanel.Dock="Right" IsChecked="{Binding MiniBrowserEnabled}" OnContent="" OffContent=""
+                      AutomationProperties.Name="{DynamicResource triggers.mini_browser_title}" />
+        <StackPanel Spacing="8">
+          <TextBlock Classes="label" Text="{DynamicResource triggers.mini_browser_title}" />
+          <TextBlock Classes="caption" TextWrapping="Wrap" Text="{DynamicResource triggers.mini_browser_description}" />
+          <Border Classes="badge" HorizontalAlignment="Left" Padding="12,6">
+            <TextBlock Text="{DynamicResource triggers.mini_browser_shortcut}" FontWeight="SemiBold" />
+          </Border>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
     <!-- Flipping the open donut to its other face: a key (recorded) and the mouse wheel -->
     <Border x:Name="FlipCard" Classes="card">
       <StackPanel Spacing="10" DataContext="{Binding Flip}" x:DataType="vm:FlipOptionsViewModel">

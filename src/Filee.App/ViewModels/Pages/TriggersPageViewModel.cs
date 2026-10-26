@@ -374,6 +374,7 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
         _platform = platform;
         _triggers = triggers;
         _integration = integration;
+        _miniBrowserEnabled = store.Settings.MiniBrowserEnabled;
         store.SettingsChanged += OnTriggerSettingsChanged;
         if (triggers is not null)
             triggers.StatusChanged += OnTriggerStatusChanged;
@@ -388,6 +389,10 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
     public FlipOptionsViewModel Flip { get; }
 
     public ScreenshotOcrShortcutViewModel ScreenshotShortcut { get; }
+
+    public bool CanUseMiniBrowser => OperatingSystem.IsWindows();
+
+    [ObservableProperty] private bool _miniBrowserEnabled;
 
     public ObservableCollection<TriggerGestureViewModel> Gestures { get; } = [];
 
@@ -413,7 +418,18 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
         linuxBackendMissing ? loc["triggers.hook_linux_backend"] : loc.Format("triggers.hook_failed", error);
 
     private void OnTriggerStatusChanged(object? sender, EventArgs e) => OnPropertyChanged(nameof(HookStatus));
-    private void OnTriggerSettingsChanged(object? sender, EventArgs e) => OnPropertyChanged(nameof(IntegrationError));
+    private void OnTriggerSettingsChanged(object? sender, EventArgs e)
+    {
+        if (MiniBrowserEnabled != _store.Settings.MiniBrowserEnabled)
+            MiniBrowserEnabled = _store.Settings.MiniBrowserEnabled;
+        OnPropertyChanged(nameof(IntegrationError));
+    }
+
+    partial void OnMiniBrowserEnabledChanged(bool value)
+    {
+        _store.Settings.MiniBrowserEnabled = value;
+        Save();
+    }
 
     [RelayCommand]
     private void OpenAccessibility()

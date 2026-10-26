@@ -14,12 +14,15 @@ change, a language may repeat; a language without lines shows the English ones):
 - `recommended`: bug fixes. The card shows once per version.
 - `optional`: new features only. No card, the sidebar button only.
 
-## 2.0.2
+## 2.0.3
 
 <!-- update
 level: optional
+en: Open a private mini browser at the pointer with Alt + right-click; repeating replaces the current window
 en: Removed the GitHub, Sponsor and version footer from the main navigation
+zh: 按 Alt + 鼠标右键在指针处打开临时置顶小窗，可调整大小；重复触发会替换当前窗口
 zh: 移除了主窗口侧栏底部的 GitHub、赞助和版本信息
+ko: Alt+오른쪽 클릭으로 포인터 위치에 임시 미니 브라우저를 열고, 다시 누르면 새 위치로 바꿔요
 ko: 왼쪽 탐색 메뉴 아래의 GitHub·후원·버전 표시를 없앴어요
 -->
 
@@ -838,4 +841,3 @@ zh: 更新通知会显示重要程度和更新内容
 
 - Ctrl+drag stopped working after the Photos app had been opened, until Filee was restarted. The donut now stays on
   top of other windows.
-

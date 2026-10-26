@@ -410,6 +410,10 @@ internal static class SettingsMigrations
         if (settings.SchemaVersion < 33 || settings.ScreenshotOcrShortcut is null)
             settings.ScreenshotOcrShortcut ??= new ScreenshotOcrShortcutSettings();
 
+        // v34: the temporary mini browser is enabled by default on Windows (Alt + right-click).
+        if (settings.SchemaVersion < 34)
+            settings.MiniBrowserEnabled = true;
+
         settings.SchemaVersion = AppSettings.CurrentSchemaVersion;
     }
 

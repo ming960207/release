@@ -134,6 +134,42 @@ public sealed class TriggerServiceLifecycleTests
     }
 
     [AvaloniaFact]
+    public void Alt_right_click_suppresses_the_context_menu_and_requests_the_mini_browser_at_the_cursor()
+    {
+        var provider = new DelayedProvider();
+        provider.AllowExit.Set();
+        using var service = CreateSynchronous(provider);
+        service.Apply(new AppSettings());
+        GestureEventArgs? requested = null;
+        service.MiniBrowserRequested += (_, e) => requested = e;
+        service.Start();
+        Assert.True(SpinWait.SpinUntil(() => provider.Runs == 1, 2000));
+
+        Assert.True(provider.PostMouse(EventType.MousePressed, 320, 210,
+            EventMask.LeftAlt | EventMask.Button2, MouseButton.Button2));
+        Assert.True(SpinWait.SpinUntil(() => { Dispatcher.UIThread.RunJobs(); return requested is not null; }, 2000));
+        Assert.Equal((320, 210), (requested!.X, requested.Y));
+        Assert.True(provider.PostMouse(EventType.MouseReleased, 320, 210, EventMask.LeftAlt, MouseButton.Button2));
+    }
+
+    [AvaloniaFact]
+    public void Mini_browser_shortcut_does_not_consume_right_click_when_disabled()
+    {
+        var provider = new DelayedProvider();
+        provider.AllowExit.Set();
+        using var service = CreateSynchronous(provider);
+        service.Apply(new AppSettings { MiniBrowserEnabled = false });
+        var requested = 0;
+        service.MiniBrowserRequested += (_, _) => requested++;
+        service.Start();
+        Assert.True(SpinWait.SpinUntil(() => provider.Runs == 1, 2000));
+
+        Assert.False(provider.PostMouse(EventType.MousePressed, 120, 90,
+            EventMask.LeftAlt | EventMask.Button2, MouseButton.Button2));
+        Assert.Equal(0, Settle(() => requested));
+    }
+
+    [AvaloniaFact]
     public void Tab_is_reported_only_while_watched_and_once_per_press()
     {
         var provider = new DelayedProvider();
@@ -228,6 +264,9 @@ public sealed class TriggerServiceLifecycleTests
             return hook;
         });
 
+    private static TriggerService CreateSynchronous(DelayedProvider provider) =>
+        new(new NullPlatformServicesForHooks(), NullLogger<TriggerService>.Instance, () => new SimpleGlobalHook(provider));
+
     // Models libuiohook's process-wide callback and asynchronous native shutdown. No OS input is hooked.
     internal sealed class DelayedProvider : IGlobalHookProvider
     {
@@ -262,7 +301,7 @@ public sealed class TriggerServiceLifecycleTests
             StopRequested.Set();
             return UioHookResult.Success;
         }
-        public void PostMouse(EventType type, short x, short y, EventMask mask)
+        public bool PostMouse(EventType type, short x, short y, EventMask mask, MouseButton button = MouseButton.Button1)
         {
             lock (_gate)
             {
@@ -270,9 +309,10 @@ public sealed class TriggerServiceLifecycleTests
                 {
                     Type = type,
                     Mask = mask,
-                    Mouse = new MouseEventData { Button = MouseButton.Button1, X = x, Y = y },
+                    Mouse = new MouseEventData { Button = button, X = x, Y = y },
                 };
                 _callback?.Invoke(ref e, _data);
+                return e.Mask.HasFlag(EventMask.SuppressEvent);
             }
         }
 

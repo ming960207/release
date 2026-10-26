@@ -34,6 +34,7 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     private MergeOrderWindow? _mergeOrder;
     private ScreenshotSelectionWindow? _screenshotSelection;
     private QuickOcrResultWindow? _quickOcrResult;
+    private MiniBrowserWindow? _miniBrowser;
 
     internal MergeOrderWindow? MergeOrder => _mergeOrder;
 
@@ -61,6 +62,43 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     {
         _quickOcrResult?.Close();
         _main?.Hide();
+    }
+
+    /// <summary>Replaces the temporary mini browser at the requested physical cursor position.</summary>
+    public void ShowMiniBrowser(int x, int y)
+    {
+        var previous = _miniBrowser;
+        _miniBrowser = null;
+        previous?.Close();
+
+        var window = new MiniBrowserWindow();
+        window.Closed += (_, _) =>
+        {
+            if (_miniBrowser != window)
+                return;
+            _miniBrowser = null;
+            trimmer.Request();
+        };
+
+        var cursor = new PixelPoint(x, y);
+        var screen = window.Screens.ScreenFromPoint(cursor) ?? window.Screens.Primary;
+        if (screen is { } targetScreen)
+        {
+            var scaling = targetScreen.Scaling;
+            var area = targetScreen.WorkingArea;
+            var width = (int)Math.Ceiling(window.Width * scaling);
+            var height = (int)Math.Ceiling(window.Height * scaling);
+            var left = Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width));
+            var top = Math.Clamp(y, area.Y, Math.Max(area.Y, area.Bottom - height));
+            window.Position = new PixelPoint(left, top);
+        }
+        else
+            window.Position = cursor;
+
+        _miniBrowser = window;
+        window.Show();
+        window.Activate();
+        window.FocusAddress();
     }
 
     /// <summary>Shows Filee's full-monitor selection overlay over a captured screen and returns the selected PNG.</summary>

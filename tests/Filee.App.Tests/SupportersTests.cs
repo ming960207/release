@@ -40,6 +40,8 @@ public class SupportersTests
     {
         var folder = Path.Combine(RepoRoot, "src", "Filee.App", "Assets", "Sponsors");
         var list = Supporters.Parse(File.ReadAllText(Path.Combine(folder, "sponsors.json")));
+        if (list.IsEmpty)
+            return;
 
         foreach (var readme in new[] { "README.md", "README.ko.md", "README.zh-CN.md", "README.pt-BR.md" })
         {

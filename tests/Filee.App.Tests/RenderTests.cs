@@ -1816,6 +1816,59 @@ public class RenderTests
         }
     }
 
+    [AvaloniaFact]
+    public void Mini_browser_quick_action_is_enabled_by_default_and_saves_changes()
+    {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "The mini browser quick action is available on Windows.");
+        TestServices.EnsureInitialized("en");
+        var store = AppHost.Get<UserDataStore>();
+        var wasEnabled = store.Settings.MiniBrowserEnabled;
+        var vm = new TriggersPageViewModel(store, AppHost.Get<Filee.Core.Localization.ILocalizer>());
+        var page = new TriggersPage { DataContext = vm };
+        var window = new Window { Content = page, Width = 820, Height = 900 };
+        try
+        {
+            window.Show();
+            Pump();
+
+            var card = page.FindControl<Border>("MiniBrowserCard")!;
+            var toggle = page.FindControl<ToggleSwitch>("MiniBrowserToggle")!;
+            Assert.True(card.IsVisible);
+            Assert.True(toggle.IsChecked);
+            Save(window, "triggers-mini-browser-en.png");
+
+            vm.MiniBrowserEnabled = false;
+            Pump();
+            Assert.False(toggle.IsChecked);
+            Assert.False(store.Settings.MiniBrowserEnabled);
+        }
+        finally
+        {
+            window.Close();
+            vm.Dispose();
+            store.Settings.MiniBrowserEnabled = wasEnabled;
+            store.SaveSettings();
+        }
+    }
+
+    [AvaloniaFact]
+    public void Mini_browser_window_defaults_to_a_small_resizable_topmost_window()
+    {
+        TestServices.EnsureInitialized("en");
+        var window = new MiniBrowserWindow();
+        try
+        {
+            Assert.True(window.Topmost);
+            Assert.True(window.CanResize);
+            Assert.Equal(560, window.Width);
+            Assert.Equal(400, window.Height);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     [AvaloniaTheory]
     [InlineData("en")]
     [InlineData("ja")]
@@ -1944,4 +1997,3 @@ public class RenderTests
         frame.Save(stream, new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
     }
 }
-

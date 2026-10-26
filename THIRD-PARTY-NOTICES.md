@@ -8,6 +8,7 @@ Each component remains under its own license.
 | Component | License | Project |
 |---|---|---|
 | Avalonia UI | MIT | https://github.com/AvaloniaUI/Avalonia |
+| Avalonia.Controls.WebView | MIT | https://github.com/AvaloniaUI/Avalonia.Controls.WebView |
 | CommunityToolkit.Mvvm | MIT | https://github.com/CommunityToolkit/dotnet |
 | SharpHook (libuiohook) | MIT (libuiohook: GPL-3.0 with linking exception / LGPL-3.0) | https://github.com/TolikPylypchuk/SharpHook |
 | Magick.NET / ImageMagick | Apache-2.0 / ImageMagick License | https://github.com/dlemstra/Magick.NET |
