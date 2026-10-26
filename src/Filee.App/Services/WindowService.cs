@@ -71,7 +71,9 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
         _miniBrowser = null;
         previous?.Close();
 
-        var window = new MiniBrowserWindow();
+        var store = services.GetRequiredService<UserDataStore>();
+        var browserData = Path.Combine(store.Directory, "MiniBrowser", "WebView2");
+        var window = new MiniBrowserWindow(store.Settings.MiniBrowserHomeUrl, browserData);
         window.Closed += (_, _) =>
         {
             if (_miniBrowser != window)
@@ -99,6 +101,14 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
         window.Show();
         window.Activate();
         window.FocusAddress();
+    }
+
+    /// <summary>Closes the temporary browser before the app exits.</summary>
+    public void CloseMiniBrowser()
+    {
+        var window = _miniBrowser;
+        _miniBrowser = null;
+        window?.Close();
     }
 
     /// <summary>Shows Filee's full-monitor selection overlay over a captured screen and returns the selected PNG.</summary>

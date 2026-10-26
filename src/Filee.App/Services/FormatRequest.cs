@@ -30,7 +30,7 @@ public static class FormatRequest
     public static Uri Url(IReadOnlyList<string> extensions)
     {
         var label = Label(extensions);
-        return new Uri(UpdateService.RepositoryUrl.TrimEnd('/') + "/issues/new?template=format_request.yml" +
+        return new Uri(ProjectLinks.SourceRepositoryUrl.TrimEnd('/') + "/issues/new?template=format_request.yml" +
             "&title=" + Uri.EscapeDataString("Format request: " + label) +
             "&extension=" + Uri.EscapeDataString(label));
     }

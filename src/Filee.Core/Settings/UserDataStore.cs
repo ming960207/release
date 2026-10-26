@@ -414,6 +414,10 @@ internal static class SettingsMigrations
         if (settings.SchemaVersion < 34)
             settings.MiniBrowserEnabled = true;
 
+        // v35: new mini browser windows open the configured address, or a blank page by default.
+        if (string.IsNullOrWhiteSpace(settings.MiniBrowserHomeUrl))
+            settings.MiniBrowserHomeUrl = "about:blank";
+
         settings.SchemaVersion = AppSettings.CurrentSchemaVersion;
     }
 

@@ -19,6 +19,20 @@ public class UserDataStoreTests
         Assert.Equal(AppSettings.CurrentSchemaVersion, store.Settings.SchemaVersion);
     }
 
+    [Fact]
+    public void Settings_from_before_the_browser_home_url_keep_the_enabled_toggle_and_get_a_blank_home()
+    {
+        using var dir = new TempDir();
+        File.WriteAllText(Path.Combine(dir.Path, "settings.json"), "{\"schemaVersion\":34,\"miniBrowserEnabled\":true}");
+
+        var store = new UserDataStore(dir.Path);
+        store.Load();
+
+        Assert.True(store.Settings.MiniBrowserEnabled);
+        Assert.Equal("about:blank", store.Settings.MiniBrowserHomeUrl);
+        Assert.Equal(AppSettings.CurrentSchemaVersion, store.Settings.SchemaVersion);
+    }
+
     [Theory]
     [InlineData(30)]
     [InlineData(31)]

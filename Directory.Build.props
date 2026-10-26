@@ -14,12 +14,12 @@
          parameters of a member is fine (CS1573). -->
     <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
 
-    <Version>2.0.3</Version>
+    <Version>2.0.4</Version>
     <Product>Filee</Product>
     <Authors>Filee contributors</Authors>
     <Copyright>Copyright (c) Filee contributors</Copyright>
 
-    <!-- Single source of truth for the GitHub repository (used by the updater and the About page). -->
+    <!-- Single source of truth for the GitHub repository used by the updater and installer. -->
     <FileeRepositoryUrl>https://github.com/ming960207/release</FileeRepositoryUrl>
     <RepositoryUrl>$(FileeRepositoryUrl)</RepositoryUrl>
   </PropertyGroup>

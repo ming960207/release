@@ -1823,6 +1823,7 @@ public class RenderTests
         TestServices.EnsureInitialized("en");
         var store = AppHost.Get<UserDataStore>();
         var wasEnabled = store.Settings.MiniBrowserEnabled;
+        var wasHomeUrl = store.Settings.MiniBrowserHomeUrl;
         var vm = new TriggersPageViewModel(store, AppHost.Get<Filee.Core.Localization.ILocalizer>());
         var page = new TriggersPage { DataContext = vm };
         var window = new Window { Content = page, Width = 820, Height = 900 };
@@ -1835,8 +1836,11 @@ public class RenderTests
             var toggle = page.FindControl<ToggleSwitch>("MiniBrowserToggle")!;
             Assert.True(card.IsVisible);
             Assert.True(toggle.IsChecked);
+            Assert.Equal("about:blank", vm.MiniBrowserHomeUrl);
             Save(window, "triggers-mini-browser-en.png");
 
+            vm.MiniBrowserHomeUrl = "https://example.com/";
+            Assert.Equal("https://example.com/", store.Settings.MiniBrowserHomeUrl);
             vm.MiniBrowserEnabled = false;
             Pump();
             Assert.False(toggle.IsChecked);
@@ -1847,6 +1851,7 @@ public class RenderTests
             window.Close();
             vm.Dispose();
             store.Settings.MiniBrowserEnabled = wasEnabled;
+            store.Settings.MiniBrowserHomeUrl = wasHomeUrl;
             store.SaveSettings();
         }
     }
@@ -1855,7 +1860,8 @@ public class RenderTests
     public void Mini_browser_window_defaults_to_a_small_resizable_topmost_window()
     {
         TestServices.EnsureInitialized("en");
-        var window = new MiniBrowserWindow();
+        var folder = Directory.CreateTempSubdirectory("filee-mini-browser-");
+        var window = new MiniBrowserWindow("about:blank", Path.Combine(folder.FullName, "WebView2"));
         try
         {
             Assert.True(window.Topmost);
@@ -1866,6 +1872,7 @@ public class RenderTests
         finally
         {
             window.Close();
+            folder.Delete(recursive: true);
         }
     }
 

@@ -79,9 +79,6 @@ public sealed partial class UpdateService : ObservableObject
         typeof(UpdateService).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
         ?? typeof(UpdateService).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
 
-    /// <summary>GitHub's "new issue" page (bug report or feature request template).</summary>
-    public static string NewIssueUrl => RepositoryUrl.TrimEnd('/') + "/issues/new/choose";
-
     /// <summary>Release list page without the /latest redirect.</summary>
     public static string LatestReleaseUrl => RepositoryUrl.TrimEnd('/') + "/releases";
 

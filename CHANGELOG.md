@@ -14,6 +14,18 @@ change, a language may repeat; a language without lines shows the English ones):
 - `recommended`: bug fixes. The card shows once per version.
 - `optional`: new features only. No card, the sidebar button only.
 
+## 2.0.4
+
+<!-- update
+level: optional
+en: Set a default address for the temporary mini browser and keep website sign-ins between sessions
+en: About and support links now point to the original Filee project; update checks remain on the Ming release repository
+zh: 可设置临时小窗浏览器的默认网址，并在关闭后保留网站 Cookie 和登录状态
+zh: 关于与支持链接指向原 Filee 项目；更新检查继续使用明盘发布仓库
+ko: 임시 미니 브라우저의 기본 주소를 설정하고 창을 닫은 뒤에도 웹사이트 로그인 상태를 유지할 수 있어요
+ko: 소개 및 지원 링크는 원래 Filee 프로젝트를 가리키고 업데이트 확인은 Ming 릴리스 저장소를 사용해요
+-->
+
 ## 2.0.3
 
 <!-- update

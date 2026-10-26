@@ -119,6 +119,8 @@ public class ListSearchTests
         {
             using var about = new AboutPageViewModel(AppHost.Get<Filee.Core.Localization.ILocalizer>(), store, AppHost.Get<UpdateService>());
             Assert.Equal(before, about.CheckForUpdates);
+            Assert.Equal(ProjectLinks.SourceRepositoryUrl, about.RepositoryUrl);
+            Assert.Equal("https://github.com/ming960207/release", UpdateService.RepositoryUrl);
             about.CheckForUpdates = !before;
             Assert.Equal(!before, store.Settings.CheckForUpdates);
             Assert.True(about.CheckNowCommand.CanExecute(null));

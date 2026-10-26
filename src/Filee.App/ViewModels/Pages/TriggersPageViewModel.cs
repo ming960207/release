@@ -375,6 +375,7 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
         _triggers = triggers;
         _integration = integration;
         _miniBrowserEnabled = store.Settings.MiniBrowserEnabled;
+        _miniBrowserHomeUrl = store.Settings.MiniBrowserHomeUrl;
         store.SettingsChanged += OnTriggerSettingsChanged;
         if (triggers is not null)
             triggers.StatusChanged += OnTriggerStatusChanged;
@@ -393,6 +394,7 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
     public bool CanUseMiniBrowser => OperatingSystem.IsWindows();
 
     [ObservableProperty] private bool _miniBrowserEnabled;
+    [ObservableProperty] private string _miniBrowserHomeUrl = "about:blank";
 
     public ObservableCollection<TriggerGestureViewModel> Gestures { get; } = [];
 
@@ -422,12 +424,26 @@ public sealed partial class TriggersPageViewModel : ObservableObject, IDisposabl
     {
         if (MiniBrowserEnabled != _store.Settings.MiniBrowserEnabled)
             MiniBrowserEnabled = _store.Settings.MiniBrowserEnabled;
+        if (MiniBrowserHomeUrl != _store.Settings.MiniBrowserHomeUrl)
+            MiniBrowserHomeUrl = _store.Settings.MiniBrowserHomeUrl;
         OnPropertyChanged(nameof(IntegrationError));
     }
 
     partial void OnMiniBrowserEnabledChanged(bool value)
     {
         _store.Settings.MiniBrowserEnabled = value;
+        Save();
+    }
+
+    partial void OnMiniBrowserHomeUrlChanged(string value)
+    {
+        var normalized = string.IsNullOrWhiteSpace(value) ? "about:blank" : value.Trim();
+        if (value != normalized)
+        {
+            MiniBrowserHomeUrl = normalized;
+            return;
+        }
+        _store.Settings.MiniBrowserHomeUrl = normalized;
         Save();
     }
 

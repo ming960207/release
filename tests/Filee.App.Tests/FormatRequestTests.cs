@@ -59,7 +59,7 @@ public sealed class FormatRequestTests : IDisposable
     {
         var url = FormatRequest.Url([".ncm", ".kgm"]).AbsoluteUri;
 
-        Assert.StartsWith(UpdateService.RepositoryUrl.TrimEnd('/') + "/issues/new?template=format_request.yml&", url);
+        Assert.StartsWith(ProjectLinks.SourceRepositoryUrl.TrimEnd('/') + "/issues/new?template=format_request.yml&", url);
         Assert.Contains("&title=Format%20request%3A%20.ncm%2C%20.kgm", url);
         Assert.Contains("&extension=.ncm%2C%20.kgm", url);
     }

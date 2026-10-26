@@ -128,7 +128,7 @@ public sealed class DonutSettings
 public sealed class AppSettings
 {
     /// <summary>Current schema version. Increase when the format changes and add a migration.</summary>
-    public const int CurrentSchemaVersion = 34;
+    public const int CurrentSchemaVersion = 35;
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
@@ -194,6 +194,9 @@ public sealed class AppSettings
 
     /// <summary>Open a temporary always-on-top mini browser with Alt + right-click (Windows).</summary>
     public bool MiniBrowserEnabled { get; set; } = true;
+
+    /// <summary>Address opened in a new mini browser window.</summary>
+    public string MiniBrowserHomeUrl { get; set; } = "about:blank";
 
     public List<TriggerGesture> Triggers { get; set; } = TriggerGesture.Defaults();
 

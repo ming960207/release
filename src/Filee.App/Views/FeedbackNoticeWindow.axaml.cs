@@ -19,13 +19,13 @@ public partial class FeedbackNoticeWindow : Window
 
     private async void OnStar(object? sender, RoutedEventArgs e)
     {
-        await Launcher.LaunchUriAsync(new Uri(UpdateService.RepositoryUrl));
+        await Launcher.LaunchUriAsync(new Uri(ProjectLinks.SourceRepositoryUrl));
         Close();
     }
 
     private async void OnIssue(object? sender, RoutedEventArgs e)
     {
-        await Launcher.LaunchUriAsync(new Uri(UpdateService.NewIssueUrl));
+        await Launcher.LaunchUriAsync(new Uri(ProjectLinks.NewIssueUrl));
         Close();
     }
 

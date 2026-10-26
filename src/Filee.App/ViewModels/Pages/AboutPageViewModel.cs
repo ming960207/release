@@ -31,7 +31,7 @@ public sealed partial class AboutPageViewModel : ObservableObject, IDisposable
     }
 
     public string Version { get; }
-    public string RepositoryUrl { get; } = UpdateService.RepositoryUrl;
+    public string RepositoryUrl { get; } = ProjectLinks.SourceRepositoryUrl;
 
     /// <summary>"What's new in Filee 2.0": the slides of the newest version up to this one; null when there are none.</summary>
     public string? WhatsNewText { get; }

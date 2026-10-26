@@ -150,6 +150,7 @@ public partial class App : Application
         desktop.Exit += (_, _) =>
         {
             watchdog.Dispose();
+            AppHost.Get<WindowService>().CloseMiniBrowser();
             AppHost.Get<MemoryTrimmer>().Dispose();
             AppHost.Get<TriggerService>().Dispose();
             AppHost.Get<QuickOcrService>().Dispose();

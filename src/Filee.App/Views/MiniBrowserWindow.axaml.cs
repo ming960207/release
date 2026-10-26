@@ -4,11 +4,15 @@ using Avalonia.Platform;
 
 namespace Filee.App.Views;
 
-/// <summary>A short-lived private browser window opened by Alt + right-click.</summary>
+/// <summary>A temporary browser window with a persistent profile, opened by Alt + right-click.</summary>
 public partial class MiniBrowserWindow : Window
 {
-    public MiniBrowserWindow()
+    private readonly string _userDataFolder;
+
+    public MiniBrowserWindow(string homeAddress, string userDataFolder)
     {
+        _userDataFolder = userDataFolder;
+        Directory.CreateDirectory(userDataFolder);
         InitializeComponent();
         Browser.EnvironmentRequested += OnEnvironmentRequested;
         Browser.NavigationStarted += OnNavigationStarted;
@@ -19,6 +23,8 @@ public partial class MiniBrowserWindow : Window
         RefreshButton.Click += (_, _) => Browser.Refresh();
         GoButton.Click += (_, _) => Navigate();
         AddressBox.KeyDown += OnAddressKeyDown;
+        AddressBox.Text = homeAddress;
+        Browser.Source = ResolveAddress(homeAddress);
     }
 
     public void FocusAddress()
@@ -27,10 +33,13 @@ public partial class MiniBrowserWindow : Window
         AddressBox.SelectAll();
     }
 
-    private static void OnEnvironmentRequested(object? sender, WebViewEnvironmentRequestedEventArgs args)
+    private void OnEnvironmentRequested(object? sender, WebViewEnvironmentRequestedEventArgs args)
     {
         if (args is WindowsWebView2EnvironmentRequestedEventArgs windows)
-            windows.IsInPrivateModeEnabled = true;
+        {
+            windows.UserDataFolder = _userDataFolder;
+            windows.IsInPrivateModeEnabled = false;
+        }
     }
 
     private void OnNavigationStarted(object? sender, WebViewNavigationStartingEventArgs args)
@@ -62,16 +71,22 @@ public partial class MiniBrowserWindow : Window
 
     private void Navigate()
     {
-        var input = AddressBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(input))
+        if (string.IsNullOrWhiteSpace(AddressBox.Text))
             return;
-
-        var uri = Uri.TryCreate(input, UriKind.Absolute, out var absolute) && absolute is not null && IsWebAddress(absolute)
-            ? absolute
-            : !input.Any(char.IsWhiteSpace) && Uri.TryCreate($"https://{input}", UriKind.Absolute, out var host) && host is not null
-                ? host
-                : new Uri($"https://www.bing.com/search?q={Uri.EscapeDataString(input)}");
+        var uri = ResolveAddress(AddressBox.Text);
         Browser.Navigate(uri);
+    }
+
+    private static Uri ResolveAddress(string? input)
+    {
+        var text = input?.Trim();
+        if (string.IsNullOrEmpty(text))
+            return new Uri("about:blank");
+        if (Uri.TryCreate(text, UriKind.Absolute, out var absolute) && absolute is not null && IsWebAddress(absolute))
+            return absolute;
+        if (!text.Any(char.IsWhiteSpace) && Uri.TryCreate($"https://{text}", UriKind.Absolute, out var host) && host is not null)
+            return host;
+        return new Uri($"https://www.bing.com/search?q={Uri.EscapeDataString(text)}");
     }
 
     private static bool IsWebAddress(Uri uri) =>

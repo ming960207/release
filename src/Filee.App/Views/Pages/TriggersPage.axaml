@@ -150,6 +150,11 @@
           <Border Classes="badge" HorizontalAlignment="Left" Padding="12,6">
             <TextBlock Text="{DynamicResource triggers.mini_browser_shortcut}" FontWeight="SemiBold" />
           </Border>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{DynamicResource triggers.mini_browser_home}" />
+            <TextBox Text="{Binding MiniBrowserHomeUrl, UpdateSourceTrigger=LostFocus}"
+                     PlaceholderText="{DynamicResource triggers.mini_browser_home_hint}" />
+          </StackPanel>
         </StackPanel>
       </DockPanel>
     </Border>

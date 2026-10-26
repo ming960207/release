@@ -437,7 +437,7 @@ public class WhatsNewTests
         var (version, seen) = (service.CurrentVersion, store.Settings.WhatsNewSeenVersion);
         try
         {
-            service.CurrentVersion = new Version(2, 0, 3);
+            service.CurrentVersion = new Version(2, 0, 4);
             var vm = new MainWindowViewModel(AppHost.Services, AppHost.Get<ILocalizer>(), AppHost.Get<UpdateService>());
             vm.Navigate("about");
             var window = new MainWindow { DataContext = vm, Width = 1080, Height = 820 };
@@ -452,7 +452,7 @@ public class WhatsNewTests
             link.Command!.Execute(null);
             Pump();
             Assert.IsType<WhatsNewWindow>(AppHost.Get<WindowService>().WhatsNew);
-            Assert.Equal("2.0.3", store.Settings.WhatsNewSeenVersion);
+            Assert.Equal("2.0.4", store.Settings.WhatsNewSeenVersion);
             AppHost.Get<WindowService>().WhatsNew!.Close();
             window.Close();
 
