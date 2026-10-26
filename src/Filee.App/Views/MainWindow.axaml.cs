@@ -1,11 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Filee.App.Services;
 using Filee.App.ViewModels;
-using Filee.Core.Localization;
 using Filee.Core.Settings;
 
 namespace Filee.App.Views;
@@ -21,15 +19,6 @@ public partial class MainWindow : Window
         InitializeComponent();
         Motion.Track(this);
     }
-
-    private async void OnOpenGitHub(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainWindowViewModel vm)
-            await Launcher.LaunchUriAsync(new Uri(vm.RepositoryUrl));
-    }
-
-    private async void OnSponsor(object? sender, RoutedEventArgs e) =>
-        await SponsorWindow.Create(AppHost.Get<ILocalizer>()).ShowDialog(this);
 
     /// <summary>
     /// Closing the window keeps Filee running in the tray, quits, or asks which (<see cref="AppSettings.CloseAction"/>).
@@ -116,3 +105,4 @@ public partial class MainWindow : Window
         });
     }
 }
+
